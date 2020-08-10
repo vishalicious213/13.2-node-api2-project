@@ -15,6 +15,8 @@ postsRouter.get('/', (req, res) => {
         })
 });
 
+// /:id response handlers
+
 postsRouter.get('/:id', (req, res) => {
     const id = req.params.id;
     db.findById(id)
@@ -35,24 +37,36 @@ postsRouter.get('/:id', (req, res) => {
         })
 });
 
-postsRouter.get('/:id/comments', (req, res) => {
-    const postId = req.params.id;
-    db.findPostComments(postId)
-        .then(comments => {
-            if (postId) {
-                res.status(200).json(comments)
+// THIS IS NOT WORKING
+postsRouter.put('/:id', (req, res) => {
+    try{
+        if (!req.body.title || !req.body.contents) {
+            return res.status(400).json({
+                message: "Please provide title and contents for the post."
+            })
+        }
+        db.update(req.params.id, req.body)
+        .then((post) => {
+            if (post) {
+                res.status(200).json(post)
             } else {
                 res.status(404).json({
-                    message: "The post with the specified ID does not exist",
+                    message: "The post with the specified ID does not exist."
                 })
             }
         })
-        .catch(error => {
-            console.log(error);
-            res.status(500).json({
-                message: 'The comments information could not be retrieved',
-            })
+    }
+        // .catch((error) => {
+        //     console.log(error)
+        //     res.status(500).json({
+        //         message: "The post information could not be modified."
+        //     })
+        // })
+    catch{
+        res.status(500).json({
+            message: "The post information could not be modified."
         })
+    }
 });
 
 postsRouter.delete('/:id', (req, res) => {
@@ -71,6 +85,28 @@ postsRouter.delete('/:id', (req, res) => {
             console.log(error);
             res.status(500).json({
                 message: 'The post could not be removed',
+            })
+        })
+});
+
+// /:id/comments response handlers
+
+postsRouter.get('/:id/comments', (req, res) => {
+    const postId = req.params.id;
+    db.findPostComments(postId)
+        .then(comments => {
+            if (postId) {
+                res.status(200).json(comments)
+            } else {
+                res.status(404).json({
+                    message: "The post with the specified ID does not exist",
+                })
+            }
+        })
+        .catch(error => {
+            console.log(error);
+            res.status(500).json({
+                message: 'The comments information could not be retrieved',
             })
         })
 });
